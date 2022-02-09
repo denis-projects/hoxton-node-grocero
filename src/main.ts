@@ -74,7 +74,7 @@ const state: State = {
   cart: []
 }
 
-function getFileName(item: Item): string {
+function getFileName(item) {
   const fileName = `${item.id
     .toString()
     .padStart(3, '0')}-${item.name.replaceAll(' ', '-')}`
@@ -84,22 +84,22 @@ function getFileName(item: Item): string {
 
 /* STATE ACTIONS */
 
-function addItemToCart(itemId: number): void {
-  const existingItem: Cart | undefined = state.cart.find(item => item.id == itemId)
+function addItemToCart(itemId) {
+  const existingItem = state.cart.find(item => item.id == itemId)
 
   if (existingItem) {
     existingItem.quantity += 1
   } else {
-    const itemToAdd: Item | undefined = state.items.find(item => item.id == itemId)
-
-    if (itemToAdd) state.cart.push({ ...itemToAdd, quantity: 1 })
+    const itemToAdd = state.items.find(item => item.id == itemId)
+    if (itemToAdd === undefined) return
+    state.cart.push({ ...itemToAdd, quantity: 1 })
   }
 
   renderCartItems()
 }
 
-function removeItemFromCart(itemID: number): void {
-  const itemToUpdate: Cart | undefined = state.cart.find(item => item.id == itemID)
+function removeItemFromCart(itemID) {
+  const itemToUpdate = state.cart.find(item => item.id == itemID)
 
   if (itemToUpdate && itemToUpdate.quantity > 1) {
     itemToUpdate.quantity -= 1
@@ -112,9 +112,9 @@ function removeItemFromCart(itemID: number): void {
 
 /* RENDER THE STORE */
 
-const storeItemList: Element | null = document.querySelector('.store--item-list')
+const storeItemList = document.querySelector('.store--item-list')
 
-function renderStoreItem(item: Item): void {
+function renderStoreItem(item) {
   const listItemEl = document.createElement('li')
 
   listItemEl.innerHTML = `
@@ -124,13 +124,13 @@ function renderStoreItem(item: Item): void {
     <button>Add to cart</button>
   `
 
-  const addBtn: HTMLButtonElement | null = listItemEl.querySelector('button')
-  if (addBtn) addBtn.addEventListener('click', () => addItemToCart(item.id))
+  const addBtn = listItemEl.querySelector('button')
+  addBtn?.addEventListener('click', () => addItemToCart(item.id))
 
-  if (storeItemList) storeItemList.appendChild(listItemEl)
+  storeItemList?.appendChild(listItemEl)
 }
 
-function renderStoreItems(): void {
+function renderStoreItems() {
   state.items.forEach(renderStoreItem)
 }
 
@@ -138,10 +138,10 @@ renderStoreItems()
 
 /* RENDER THE CART */
 
-const cartItemList: Element | null = document.querySelector('.cart--item-list')
+const cartItemList = document.querySelector('.cart--item-list')
 
-function renderCartItem(item: Cart): void {
-  const listItemEl: HTMLLIElement = document.createElement('li')
+function renderCartItem(item) {
+  const listItemEl = document.createElement('li')
 
   listItemEl.innerHTML = `
     <img class="cart--item-icon" src=${getFileName(item)} alt="${item.name}">
@@ -152,16 +152,18 @@ function renderCartItem(item: Cart): void {
   `
 
   const addBtn = listItemEl.querySelector('.add-btn')
-  if (addBtn) addBtn.addEventListener('click', () => addItemToCart(item.id))
+  addBtn?.addEventListener('click', () => addItemToCart(item.id))
 
   const removeBtn = listItemEl.querySelector('.remove-btn')
-  if (removeBtn) removeBtn.addEventListener('click', () => removeItemFromCart(item.id))
+  removeBtn?.addEventListener('click', () => removeItemFromCart(item.id))
 
-  if (cartItemList) cartItemList.appendChild(listItemEl)
+  cartItemList?.appendChild(listItemEl)
 }
 
 function renderCartItems() {
-  if (cartItemList) cartItemList.innerHTML = ''
+
+  if (cartItemList === null) return
+  cartItemList.innerHTML = ''
 
   state.cart.forEach(renderCartItem)
 
@@ -170,12 +172,16 @@ function renderCartItems() {
 
 /* RENDER THE TOTAL */
 
-const totalNumber = document.querySelector('.total-number')
 
 function renderTotal() {
+
+  const totalNumber = document.querySelector('.total-number')
+
+  if (totalNumber === null) return
+
   let total = 0
 
   state.cart.forEach(item => (total += item.quantity * item.price))
 
-  if (totalNumber) totalNumber.textContent = `£${total.toFixed(2)}`
+  totalNumber.textContent = `£${total.toFixed(2)}`
 }
